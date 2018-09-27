@@ -67,7 +67,7 @@ pplx::task<void> Rest::hochladen()
             ss << e.what() << std::endl;
             std::wcout << ss.str();
 
-            // Return an empty task.
+
             return pplx::task_from_result();
         }
     });

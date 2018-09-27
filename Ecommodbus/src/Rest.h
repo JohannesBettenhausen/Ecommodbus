@@ -20,7 +20,6 @@ private:
 public:
 	Rest();
 	pplx::task<void> hochladen();
-	void lala();
 };
 
 } /* namespace mod */

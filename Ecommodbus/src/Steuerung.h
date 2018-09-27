@@ -30,7 +30,7 @@ public:
 	/*Greift die Daten von den Brennern ab*/
 	void hole_daten(std::string ipv4);
 	/*Extrahiert die relevanten Daten aus dem Outputstream*/
-	void parse_datenstream(std::string eingang);
+	void parse_datenstrom(std::string eingang);
 
 	void json_abschluss();
 };

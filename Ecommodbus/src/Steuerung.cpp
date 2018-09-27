@@ -29,7 +29,7 @@ void Steuerung::hole_daten(std::string ipv4){
 
 }
 
-void Steuerung::parse_datenstream(string eingang){
+void Steuerung::parse_datenstrom(string eingang){
 
 	string jsonarr="";
 	int hintererzeiger=0;
