@@ -15,11 +15,13 @@ class Rest {
 
 private:
 
+	std::string datenart[15]={"offenname","O2","CO","CO2","NO","NO2","SO2","NOX","ETA","Lamda","Losses","Air_temperatur","Gas_temp","Airpressure","Sensor Temperature"};
+	void jsonhochladen(web::json::value postData);
 	//web::http::client::http_client *client(("http//localhost"));
 
 public:
-	Rest();
-	pplx::task<void> hochladen();
+	Rest(std::string daten[]);
+	void datenhochladen(std::string daten[]);
 };
 
 } /* namespace mod */

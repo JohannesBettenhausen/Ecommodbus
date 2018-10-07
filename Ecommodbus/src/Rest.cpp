@@ -21,18 +21,27 @@ using namespace std;
 
 namespace mod {
 
-Rest::Rest() {
+Rest::Rest(string daten[]) {
 	// TODO Auto-generated constructor stub
+	datenhochladen(daten);
 
 }
 
+void Rest::datenhochladen(string daten[]){
 
-void Rest::jsonhochladen(){
+	json::value postData;
+
+	for(int i=0;i<15;i++){
+
+		postData[this->datenart[i]]=json::value::string(U(daten[i]));
+
+	}
+	jsonhochladen(postData);
+}
+
+void Rest::jsonhochladen(json::value postData){
 
 	http_client client(("http://127.0.0.1:8000"));
-	json::value postData;
-	postData["offenname"] = json::value::string(U("Client_1"));
-
 	http_response response = client.request(methods::POST,"messdaten/",postData.to_string().c_str(),"application/json").get();
 
 	if(response.status_code() == status_codes::OK)
@@ -43,55 +52,5 @@ void Rest::jsonhochladen(){
 	}
 
 }
-
-
-pplx::task<void> Rest::hochladen()
-{
-
-    using concurrency::streams::file_stream;
-    using concurrency::streams::basic_istream;
-    using concurrency::streams::stringstream;
-
-
-    auto ss = concurrency::streams::stringstream::open_istream("");
-    return file_stream<unsigned char>::open_istream("messdaten.txt").then([](pplx::task<basic_istream<unsigned char>> previousTask)
-
-    {
-        try
-        {
-            auto fileStream = previousTask.get();
-
-            http_client client("http://127.0.0.1:8000");
-            return client.request(methods::POST, "messdaten/", fileStream,"application/x-www-form-urlencoded").then([fileStream](pplx::task<http_response> previousTask)
-            {
-                fileStream.close();
-
-                std::wostringstream ss;
-                try
-                {
-                    auto response = previousTask.get();
-                    ss << L"Server returned returned status code " << response.status_code() << L"." << std::endl;
-                }
-                catch (const http_exception& e)
-                {
-                    ss << e.what() << std::endl;
-                }
-                std::wcout << ss.str();
-            });
-        }
-        catch (const std::system_error& e)
-        {
-            std::wostringstream ss;
-            ss << e.what() << std::endl;
-            std::wcout << ss.str();
-
-
-            return pplx::task_from_result();
-        }
-    });
-
-
-}
-
 
 } /* namespace mod */

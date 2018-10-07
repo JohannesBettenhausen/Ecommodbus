@@ -31,31 +31,39 @@ void Steuerung::hole_daten(std::string ipv4){
 
 void Steuerung::parse_datenstrom(string eingang){
 
-	string jsonarr="";
+	string jsonarr [15];
 	int hintererzeiger=0;
 	int vordererzeiger=0;
-	for(int i=0;i<19;i++){
+	for(int i=0;i<31;i++){
 
-		hintererzeiger=(int)eingang.find_first_of("\n", vordererzeiger);
+
 		if(i==0){
 
-			jsonarr+="\"Offen_"+eingang.substr(vordererzeiger, hintererzeiger-vordererzeiger)+"\":[";
+			hintererzeiger=(int)eingang.find_first_of("\n", vordererzeiger);
+
+			jsonarr[i]="Offen_"+eingang.substr(vordererzeiger, hintererzeiger-vordererzeiger);
 		}
-		else {
+			else if (i%2==1){
 
-			if(eingang.substr(vordererzeiger, 1)!="-"&&i!=18){
+				hintererzeiger=(int)eingang.find_first_of(":", vordererzeiger);
 
-				jsonarr+="\""+eingang.substr(vordererzeiger, hintererzeiger-vordererzeiger)+"\""+", ";
-			}
-			if(i==18){
+				}
+				else if(i%2==0){
 
-				jsonarr+="\""+eingang.substr(vordererzeiger, hintererzeiger-vordererzeiger)+"\""+"]";
-			}
+					hintererzeiger=(int)eingang.find_first_of("\n", vordererzeiger);
+					//stringstream temp_s;
+					//temp_s<<i/2;
+					//jsonarr[i]=temp_s.str();
+					string temp=eingang.substr(vordererzeiger, hintererzeiger-vordererzeiger);
+					temp.erase(std::remove(temp.begin(), temp.end(), ' '), temp.end());
+					jsonarr[i/2]=temp;
+				}
+
+			vordererzeiger=hintererzeiger+1;
 		}
 
-		vordererzeiger=hintererzeiger+1;
-	}
-	this->jsonstring+=jsonarr+"\n";
+
+		mod::Rest vb(jsonarr);
 }
 
 void Steuerung::json_abschluss(){
@@ -67,27 +75,29 @@ void Steuerung::json_abschluss(){
 int main(int argc,char *argv[],char *envp[]){
 
 
-	mod::Rest vb;
-	vb.hochladen().wait();
+	/*mod::Rest vb;
+	vb.jsonhochladen();
+	*/
 
 
 	//------------------------------------------------------------------------------------------
 
 
-	/*Steuerung befehl;
+	Steuerung befehl;
 	std::thread p1(&Steuerung::hole_daten,&befehl,"127.0.0.1");
-	std::thread p2(&Steuerung::hole_daten,&befehl,"192.168.178.50");
+	//std::thread p2(&Steuerung::hole_daten,&befehl,"192.168.178.50");
 
-	p2.join();
+	//p2.join();
 	p1.join();
 	while(!befehl.schlange.empty()){
 
-		befehl.parse_datenstream(befehl.schlange.front());
+		cout<<befehl.schlange.front();
+		befehl.parse_datenstrom(befehl.schlange.front());
 		befehl.schlange.pop();
 	}
 	befehl.json_abschluss();
 
-	*/
+
 
 	/*Datenbank Oeffen("ecomModbusOeffen","tcp://127.0.0.1:3306", "root","__ecomRoot__");
 	string ids[2]={"Offennummer","INT"};
