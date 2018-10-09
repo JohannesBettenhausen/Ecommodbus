@@ -84,19 +84,21 @@ int main(int argc,char *argv[],char *envp[]){
 
 
 	Steuerung befehl;
-	std::thread p1(&Steuerung::hole_daten,&befehl,"127.0.0.1");
-	//std::thread p2(&Steuerung::hole_daten,&befehl,"192.168.178.50");
 
-	//p2.join();
-	p1.join();
-	while(!befehl.schlange.empty()){
+	while(1){
 
-		cout<<befehl.schlange.front();
-		befehl.parse_datenstrom(befehl.schlange.front());
-		befehl.schlange.pop();
+		//std::thread p1(&Steuerung::hole_daten,&befehl,"127.0.0.1");
+		std::thread p2(&Steuerung::hole_daten,&befehl,"192.168.178.50");
+
+		p2.join();
+		//p1.join();
+		while(!befehl.schlange.empty()){
+
+			befehl.parse_datenstrom(befehl.schlange.front());
+			befehl.schlange.pop();
+		}
+		befehl.json_abschluss();
 	}
-	befehl.json_abschluss();
-
 
 
 	/*Datenbank Oeffen("ecomModbusOeffen","tcp://127.0.0.1:3306", "root","__ecomRoot__");

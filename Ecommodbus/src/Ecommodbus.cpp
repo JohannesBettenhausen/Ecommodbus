@@ -50,20 +50,15 @@ void closesocket(int socket) { close(socket); }
 
 #include <stdio.h>
 
-#pragma comment(lib, "Ws2_32.lib")
 
 #ifdef __WINDOWS__
+#pragma comment(lib, "Ws2_32.lib")
 WSADATA wsaData;
 #endif
 
 
 
 namespace mod {
-
-
-
-
-
 
 Ecommodbus::Ecommodbus(std::string comport,std::string ipv4) {
 
@@ -101,7 +96,7 @@ Ecommodbus::Ecommodbus(std::string comport,std::string ipv4) {
 	            ComPortStr += comPort;
 	            PRINT_OUT("Open Comport: %s\n", ComPortStr.c_str());
 	            this->ctx = modbus_new_rtu(ComPortStr.c_str(), 9600, 'N', 8, 1);
-	            modbus_set_slave(this->ctx, 0x0002);
+
 
 	        }
 
@@ -111,6 +106,8 @@ Ecommodbus::Ecommodbus(std::string comport,std::string ipv4) {
 	            //return -1;
 
 	        }
+
+            modbus_set_slave(this->ctx, 0x0002);
 
 	    #ifdef __WINDOWS__
 
@@ -166,33 +163,6 @@ const char * Ecommodbus::FunctionCodeToString(const uint8_t functionCode)
     }
     }
 }
-void Ecommodbus::ecom_modbus_master_parse_request(modbus_t *ctx, const uint8_t *inputBuffer)
-{
-    const uint8_t headerLength = modbus_get_header_length(ctx);
-
-    const uint8_t functionCode = inputBuffer[headerLength];
-
-    MASTER_TRACE("MASTER Received: FunctionCode: %s (%d) ", FunctionCodeToString(functionCode), functionCode);
-
-    if (MODBUS_FC_READ_HOLDING_REGISTERS == functionCode) {
-        /* Read holding registers */
-    }
-    else if (MODBUS_FC_WRITE_SINGLE_REGISTER == functionCode) {
-        const int addr = MODBUS_GET_INT16_FROM_INT8(inputBuffer, headerLength + 1);
-
-        MASTER_TRACE("Addr: 0x%.2X ", addr);
-        if (ECOM_MODBUS_DATA_ADDRESS_SET_MEASUREMENT_INTERVAL == addr) {
-            const int value = MODBUS_GET_INT16_FROM_INT8(inputBuffer, headerLength + 3);
-            MASTER_TRACE("Value: 0x%.2X ", value);
-            const int crc = MODBUS_GET_INT16_FROM_INT8(inputBuffer, headerLength + 5);
-            MASTER_TRACE("CRC16: 0x%.2X \n", crc);
-            MASTER_TRACE("SLAVE  Meaning : Set %s\n", MeasurementIntervalToString(value));
-        }
-    }
-    else {
-        fprintf(stderr, "Not supported functionCode: %s (%d)\n", FunctionCodeToString(functionCode), functionCode);
-    }
-}
 
 /*---------------------------------------------------------------------------------------*/
 
@@ -223,15 +193,6 @@ uint16_t Ecommodbus::ecom_modbus_master_read_holding_register(modbus_t *ctx, int
     }
     MASTER_TRACE("Received Register value = %d (0x%02X)\n", Register[0], Register[0]);
     return  Register[0];
-}
-
-void Ecommodbus::SetupConsole(const std::string &title) {
-    std::wstring wsTmp(title.begin(), title.end());
-
-    LPWSTR lpszString = (WCHAR*)wsTmp.c_str();
-
-// TODO Opfermann
-//    SetConsoleTitle(lpszString);
 }
 
 double Ecommodbus::CalulcateCorrectionFactorToStandardExcessAir(const double referenceO2InPermill,const double measuredO2InPermill){
@@ -315,15 +276,10 @@ std::string Ecommodbus::ecom_modbus_master_parsemode( int numberOfRetries)
     modbus_set_debug(this-->ctx, TRUE);
 #endif
 
-    const char *out;
     timeval tv;
-    uint32_t response_to_sec;
-    uint32_t response_to_usec;
 
     /* Save original timeout */
     modbus_get_response_timeout(this->ctx, &tv);
-    response_to_sec = tv.tv_sec ;
-    response_to_usec = tv.tv_usec;
 
     /* Define a new 250ms timeout! */
     tv.tv_sec = 0;
@@ -335,13 +291,11 @@ std::string Ecommodbus::ecom_modbus_master_parsemode( int numberOfRetries)
     if (modbus_connect(this->ctx) == -1) {
         fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
         modbus_free(this->ctx);
-        out="Error";
         //return 0;
     }
 
     modbus_flush(this->ctx);
 
-    int i = 0;
 
     bool measurementStopped = true;
 
@@ -419,7 +373,7 @@ std::string Ecommodbus::ecom_modbus_master_parsemode( int numberOfRetries)
 
         Sleep(500);
 
-        if (numberOfRetries==0){
+        if (MeasurementStatus > 0){
 
         	modbus_close(this->ctx);
         	modbus_free(this->ctx);
@@ -435,15 +389,10 @@ std::string Ecommodbus::ecom_modbus_master( int numberOfRetries)
     modbus_set_debug(this-->ctx, TRUE);
 #endif
 
-    const char *out;
     timeval tv;
-    uint32_t response_to_sec;
-    uint32_t response_to_usec;
 
     /* Save original timeout */
     modbus_get_response_timeout(this->ctx, &tv);
-    response_to_sec = tv.tv_sec ;
-    response_to_usec = tv.tv_usec;
 
     /* Define a new 250ms timeout! */
     tv.tv_sec = 0;
@@ -455,7 +404,6 @@ std::string Ecommodbus::ecom_modbus_master( int numberOfRetries)
     if (modbus_connect(this->ctx) == -1) {
         fprintf(stderr, "Connection failed: %s\n", modbus_strerror(errno));
         modbus_free(this->ctx);
-        out="Error";
         //return 0;
     }
 
