@@ -56,13 +56,9 @@ private:
 
 	static const char * FunctionCodeToString(const uint8_t functionCode);
 
-	static void ecom_modbus_master_parse_request(modbus_t *ctx, const uint8_t *inputBuffer);
-
 	static void ecom_modbus_master_set_measurment_interval(modbus_t *ctx, /*MeasurementInterval*/ int interval);
 
 	static uint16_t ecom_modbus_master_read_holding_register(modbus_t *ctx, int dataAddress, int * error);
-
-	static void SetupConsole(const std::string &title);
 
 	double CalulcateCorrectionFactorToStandardExcessAir(const double referenceO2InPermill,const double measuredO2InPermill);
 
