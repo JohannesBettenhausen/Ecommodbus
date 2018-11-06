@@ -6,16 +6,40 @@
  */
 
 #include "Steuerung.h"
-#include "Datenbank.h"
 #include <string>
 #include "Ecommodbus.h"
 #include <sstream>
 #include <thread>
 #include <queue>
 #include "Rest.h"
+#include <fstream>
+using namespace std;
+
 Steuerung::Steuerung() {
 	// TODO Auto-generated constructor stub
-	this->jsonstring="{ \n";
+
+}
+
+string Steuerung::ipadressen_extrahieren(){
+
+	fstream datei;
+	string ipadressen;
+	datei.open("/home/johannes/git/repository/Ecommodbus/src/ipadressen");
+	if(datei.is_open()){
+
+		while(getline(datei,ipadressen)){
+
+			cout<<ipadressen<<endl;
+		}
+
+	}
+	else{
+
+		cout<<"Die Konfigurationsdatei exsistiert nicht";
+	}
+	datei.close();
+	return ipadressen;
+
 }
 
 void Steuerung::hole_daten(std::string ipv4){
@@ -66,25 +90,16 @@ void Steuerung::parse_datenstrom(string eingang){
 		mod::Rest vb(jsonarr);
 }
 
-void Steuerung::json_abschluss(){
-
-	this->jsonstring+="}";
-	cout<<this->jsonstring;
-}
 
 int main(int argc,char *argv[],char *envp[]){
-
-
-	/*mod::Rest vb;
-	vb.jsonhochladen();
-	*/
 
 
 	//------------------------------------------------------------------------------------------
 
 
 	Steuerung befehl;
-
+	befehl.ipadressen_extrahieren();
+	/*
 	while(1){
 
 		//std::thread p1(&Steuerung::hole_daten,&befehl,"127.0.0.1");
@@ -97,20 +112,6 @@ int main(int argc,char *argv[],char *envp[]){
 			befehl.parse_datenstrom(befehl.schlange.front());
 			befehl.schlange.pop();
 		}
-		befehl.json_abschluss();
 	}
-
-
-	/*Datenbank Oeffen("ecomModbusOeffen","tcp://127.0.0.1:3306", "root","__ecomRoot__");
-	string ids[2]={"Offennummer","INT"};
-	Oeffen.tabelle_erstellen("Offen_1",ids,1);
-	Oeffen.tabelle_erstellen("Offen_2",ids,1);
-	cout<<Oeffen.tabelle_existiert("Offen_2")<< std::endl;
-	cout<<Oeffen.tabelle_existiert("Offen_22")<< std::endl;
-	string eintrag[2]={"Offennummer","3"};
-	Oeffen.tabellen_eintrag("Offen_1",eintrag, 1);
-	string eintrag2[2]={"Offennummer","5"};
-	Oeffen.tabellen_eintrag("Offen_1",eintrag2, 1);
-	cout<<Oeffen.datenbank_abfrage("Offen_1")<< std::endl;*/
-
+	*/
 }
