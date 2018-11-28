@@ -18,21 +18,26 @@ private:
 
 	/*Stellt sicher, dass die Queue nur von einem Thread gleichzeitig befüllt wird*/
 	std::mutex queueschranke;
-	/*Jsonstring für REsT*/
-	std::string jsonstring;
+
+
 
 public:
 
 	/*Queue in der die einzelnen Outputsteams der Threads af die bearbeitung warten*/
 	std::queue<std::string> schlange;
+	/*Variable fuer die anzahl der Oeffen*/
+	int anzahl;
 	/**/
 	Steuerung();
 	/*Greift die Daten von den Brennern ab*/
 	void hole_daten(std::string ipv4);
 	/*Extrahiert die relevanten Daten aus dem Outputstream*/
 	void parse_datenstrom(std::string eingang);
+	/*Gibt ein Array mit IPadressen zurueck*/
+	void ermittle_ipadressen(std::string ipadressen[],std::string ipstrom);
+	/*Extrahiert IPandressen aus der Konfigurationsdatei*/
+	std::string ipadressen_extrahieren();
 
-	void json_abschluss();
 };
 
 #endif /* IMPLEMENT_STEUERUNG_H_ */

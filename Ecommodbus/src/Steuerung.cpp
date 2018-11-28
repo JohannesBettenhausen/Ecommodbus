@@ -17,19 +17,22 @@ using namespace std;
 
 Steuerung::Steuerung() {
 	// TODO Auto-generated constructor stub
-
+	this->anzahl=0;
 }
 
 string Steuerung::ipadressen_extrahieren(){
 
 	fstream datei;
+	string ipadresse;
 	string ipadressen;
-	datei.open("/home/johannes/git/repository/Ecommodbus/src/ipadressen");
+	string benutzer =get_current_dir_name();
+	datei.open(benutzer+"/src/ipadressen");
 	if(datei.is_open()){
 
-		while(getline(datei,ipadressen)){
+		while(getline(datei,ipadresse)){
 
-			cout<<ipadressen<<endl;
+			ipadressen+=ipadresse+"\n";
+			this->anzahl++;
 		}
 
 	}
@@ -39,6 +42,19 @@ string Steuerung::ipadressen_extrahieren(){
 	}
 	datei.close();
 	return ipadressen;
+
+}
+
+void Steuerung::ermittle_ipadressen(string ipadressen[],string ipstrom){
+
+	int hintererzeiger=0;
+	int vordererzeiger=0;
+	for(int i=0;i<this->anzahl;i++){
+
+		hintererzeiger=(int)ipstrom.find_first_of("\n", vordererzeiger);
+		ipadressen[i]=ipstrom.substr(vordererzeiger, hintererzeiger-vordererzeiger);
+		vordererzeiger=hintererzeiger+1;
+	}
 
 }
 
@@ -96,9 +112,26 @@ int main(int argc,char *argv[],char *envp[]){
 
 	//------------------------------------------------------------------------------------------
 
-
+	string ipstrom;
 	Steuerung befehl;
-	befehl.ipadressen_extrahieren();
+	ipstrom=befehl.ipadressen_extrahieren();
+	string ipadressen[befehl.anzahl];
+	thread prozzesse[befehl.anzahl];
+	befehl.ermittle_ipadressen(ipadressen, ipstrom);
+	for (int i=0;i<befehl.anzahl;i++){
+
+		prozzesse[i]=thread (&Steuerung::hole_daten,&befehl,ipadressen[i]);
+	}
+
+	for (int i=0;i<befehl.anzahl;i++){
+
+		prozzesse[i].join();
+	}
+	while(!befehl.schlange.empty()){
+
+		befehl.parse_datenstrom(befehl.schlange.front());
+		befehl.schlange.pop();
+	}
 	/*
 	while(1){
 
@@ -107,11 +140,7 @@ int main(int argc,char *argv[],char *envp[]){
 
 		p2.join();
 		//p1.join();
-		while(!befehl.schlange.empty()){
 
-			befehl.parse_datenstrom(befehl.schlange.front());
-			befehl.schlange.pop();
-		}
 	}
 	*/
 }
